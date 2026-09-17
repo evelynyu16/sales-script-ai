@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { t } from "@/lib/i18n";
 import type {
   Channel,
@@ -16,6 +16,38 @@ const CHANNELS: Channel[] = ["email", "linkedin", "sms", "phone"];
 const TONES: Tone[] = ["professional", "friendly", "direct"];
 const GOALS: Goal[] = ["first_touch", "follow_up", "objection", "meeting_ask"];
 
+const DRAFT_KEY = "salesscript-draft-v1";
+
+const CHANNELS_SET = new Set<string>(["email", "linkedin", "sms", "phone"]);
+const TONES_SET = new Set<string>(["professional", "friendly", "direct"]);
+const GOALS_SET = new Set<string>([
+  "first_touch",
+  "follow_up",
+  "objection",
+  "meeting_ask",
+]);
+
+type Draft = {
+  lang: Lang;
+  leadNotes: string;
+  productOffer: string;
+  channel: Channel;
+  tone: Tone;
+  goal: Goal;
+};
+
+function loadDraft(): Partial<Draft> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<Draft>;
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function SalesForm() {
   const [lang, setLang] = useState<Lang>("en");
   const c = useMemo(() => t(lang), [lang]);
@@ -25,10 +57,45 @@ export function SalesForm() {
   const [channel, setChannel] = useState<Channel>("email");
   const [tone, setTone] = useState<Tone>("professional");
   const [goal, setGoal] = useState<Goal>("first_touch");
+  const [draftReady, setDraftReady] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [variants, setVariants] = useState<ScriptVariant[]>([]);
+
+  // Restore draft once on mount (client-only)
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft) {
+      if (draft.lang === "en" || draft.lang === "zh") setLang(draft.lang);
+      if (typeof draft.leadNotes === "string") setLeadNotes(draft.leadNotes);
+      if (typeof draft.productOffer === "string")
+        setProductOffer(draft.productOffer);
+      if (draft.channel && CHANNELS_SET.has(draft.channel))
+        setChannel(draft.channel);
+      if (draft.tone && TONES_SET.has(draft.tone)) setTone(draft.tone);
+      if (draft.goal && GOALS_SET.has(draft.goal)) setGoal(draft.goal);
+    }
+    setDraftReady(true);
+  }, []);
+
+  // Persist draft whenever fields change (after restore)
+  useEffect(() => {
+    if (!draftReady) return;
+    const draft: Draft = {
+      lang,
+      leadNotes,
+      productOffer,
+      channel,
+      tone,
+      goal,
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [draftReady, lang, leadNotes, productOffer, channel, tone, goal]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
