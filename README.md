@@ -1,17 +1,36 @@
 # SalesScript AI
 
-AI Sales Follow-up Assistant — paste lead/customer context and generate outreach, follow-up, objection-handling, and meeting-ask scripts for **email**, **LinkedIn DM**, **SMS**, and **phone**.
+A personal portfolio project: an AI sales follow-up assistant that turns messy lead notes into ready-to-send outreach scripts.
 
-UI supports **English + 中文** (toggle in the header).
+## The problem
+
+Sales follow-ups are repetitive but high-stakes. You already know the lead — who they are, what they said, what you're pitching — yet writing a clear email, LinkedIn DM, SMS, or phone opener still takes time. Generic templates ignore context; blank pages stall the next touch.
+
+**SalesScript AI** takes that context and generates 2–3 channel-aware script variants (plus an email subject when relevant) so you can edit and send faster.
+
+## Why English + 中文
+
+I work across English- and Chinese-speaking contexts. The UI toggles between **EN** and **中文**, and generated scripts follow the selected language so the same workflow works for both audiences.
 
 ## Stack
 
-- Next.js (App Router) + TypeScript + Tailwind CSS
-- OpenAI-compatible LLM API (Groq by default; Gemini also works)
+- **Next.js** (App Router) + **TypeScript** + **Tailwind CSS**
+- OpenAI-compatible LLM API (**Groq** by default; **Gemini** also works via its OpenAI-compatible endpoint)
+- Client-side draft memory via `localStorage` (no account / no server-side storage of form input)
+
+## Features
+
+- Lead notes (required), optional product/offer, channel, tone, and goal
+- Channels: email, LinkedIn DM, SMS, phone
+- Goals: first touch, follow-up, objection handling, meeting ask
+- Copy or download each variant as a `.txt` file
+- Remembers your form draft in the browser between visits
+- Loading and error states (including missing API key)
 
 ## Local setup
 
 ```bash
+git clone https://github.com/evelynyu16/sales-script-ai.git
 cd sales-script-ai
 cp .env.example .env.local
 # edit .env.local and set LLM_API_KEY
@@ -31,9 +50,11 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Free API key options
 
+You can run this locally (or on Vercel) with a free-tier key from either provider.
+
 ### Groq (default)
 
-1. Sign up at [https://console.groq.com](https://console.groq.com)
+1. Sign up at [console.groq.com](https://console.groq.com)
 2. Create an API key
 3. In `.env.local`:
 
@@ -56,29 +77,21 @@ LLM_MODEL=gemini-2.0-flash
 
 ## Deploy on Vercel
 
-1. Push this repo to GitHub
+1. Fork or push this repo to GitHub
 2. Import the project in [Vercel](https://vercel.com)
-3. Add the same env vars (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`) in Project Settings → Environment Variables
+3. Add `LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` under Project Settings → Environment Variables
 4. Deploy
 
-Serverless route: `POST /api/generate`. Keep the API key server-side only — never expose it to the client.
+The generate endpoint is `POST /api/generate`. Keep the API key server-side only — never expose it to the client.
 
-## Features (MVP)
+## Possible next steps (not built)
 
-- Lead notes (required), product/offer, channel, tone, goal
-- 2–3 script variants + email subject line when channel is email
-- Copy-to-clipboard per variant
-- Loading and error states (including missing API key)
+- Rate limits / freemium caps
+- Saved history or templates
+- CRM paste helpers
+- Shared tone guidelines for a team
 
-## Future freemium ideas (not built)
-
-- Daily free generations + paid higher limits
-- Saved script history / templates per workspace
-- CRM paste helpers (HubSpot / Salesforce snippet)
-- Team shared tone guidelines
-- A/B score tips on variants
-
-No payments in this MVP.
+This is an MVP portfolio demo — no payments, no user accounts, no production usage claims.
 
 ## License
 
