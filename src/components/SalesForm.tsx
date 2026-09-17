@@ -331,6 +331,7 @@ export function SalesForm() {
                 subjectLabel={c.subject}
                 copyLabel={c.copy}
                 copiedLabel={c.copied}
+                downloadLabel={c.download}
               />
             ))
           )}
